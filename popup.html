@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Web Content Downloader</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 550px;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+    }
+    .wrapper {
+      flex: 1 0 auto;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .card {
+      background-color: #e6f2ff; /* Couleur de fond bleutée légère */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    #csvFile {
+      display: none;
+    }
+    .file-input-label {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    #previewSection {
+      display: none;
+    }
+    #preview {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+      background-color: white; /* Assurez-vous que le fond est blanc */
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .pagination button {
+      padding: 8px 12px;
+      background-color: #555;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #pageInfo {
+      font-size: 14px;
+      color: #666;
+    }
+    #downloadAll {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+    .instructions {
+      background-color: #cce5ff; /* Bleu un peu plus foncé pour les instructions */
+      border-left: 6px solid #007bff; /* Bordure gauche bleue plus foncée */
+      padding: 15px;
+      font-size: 14px;
+      position: relative;
+    }
+    .hide-instructions {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #666;
+    }
+    .content {
+      flex: 1;
+    }
+    footer {
+      flex-shrink: 0;
+      background-color: #f8f8f8;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      border-top: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    footer a {
+      text-decoration: none;
+      color: inherit;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    .social-icons {
+      margin-top: 5px;
+    }
+    .social-icons a {
+      margin: 0 5px;
+    }
+    .social-icons img {
+      vertical-align: middle;
+    }
+    .input-section {
+      margin-bottom: 20px;
+    }
+    .input-toggle {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .input-toggle button {
+      flex: 1;
+      padding: 10px;
+      background-color: #ddd;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .input-toggle button.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    #urlTextArea {
+      width: 100%;
+      height: 120px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    .image-container {
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .image-url {
+      word-break: break-all;
+      margin-top: 5px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Web Content Downloader</h1>
+    <div class="card instructions" id="instructionsSection">
+      <button class="hide-instructions" id="hideInstructions">×</button>
+      <p><strong>Comment utiliser cet outil :</strong></p>
+      <ol>
+        <li>Sélectionnez un fichier CSV contenant des URLs de site web contenant des images (une par ligne).</li>
+        <li>Ou collez directement les URLs dans la zone de texte, une par ligne.</li>
+        <li>Les images seront prévisualisées automatiquement.</li>
+        <li>Utilisez les boutons de pagination pour naviguer entre les images.</li>
+        <li>Cliquez sur "Tout télécharger" pour sauvegarder toutes les images.</li>
+      </ol>
+    </div>
+    <div class="card input-section">
+      <div class="input-toggle">
+        <button id="csvToggle" class="active">Fichier CSV</button>
+        <button id="textToggle">Texte</button>
+      </div>
+      <div id="csvInput">
+        <input type="file" id="csvFile" accept=".csv">
+        <label for="csvFile" class="file-input-label">Choisir un fichier CSV</label>
+      </div>
+      <div id="textInput" style="display:none;">
+        <textarea id="urlTextArea" placeholder="Collez vos URLs ici, une par ligne"></textarea>
+        <button id="loadUrls" class="file-input-label">Charger les URLs</button>
+      </div>
+    </div>
+    <div class="card" id="previewSection">
+      <div id="preview"></div>
+      <div class="pagination">
+        <button id="prevPage" style="display:none;">Précédent</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" style="display:none;">Suivant</button>
+      </div>
+      <button id="downloadAll">Tout télécharger</button>
+    </div>
+  </div>
+  <footer>
+    <p>© 2023 Web Content Downloader. Tous droits réservés.</p>
+    <p>Développé par Guillaume OSTORERO</p>
+    <div class="social-icons">
+      <a href="https://github.com/Guigeek973" target="_blank" rel="noopener noreferrer">
+        <img src="https://github.com/favicon.ico" alt="GitHub" width="16" height="16">
+      </a>
+      <a href="https://www.linkedin.com/in/guillaume-ostorero/" target="_blank" rel="noopener noreferrer">
+        <img src="https://www.linkedin.com/favicon.ico" alt="LinkedIn" width="16" height="16">
+      </a>
+    </div>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>

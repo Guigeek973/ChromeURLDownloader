@@ -1,0 +1,1 @@
+// Ce script peut être utilisé pour interagir avec la page web si nécessaire
