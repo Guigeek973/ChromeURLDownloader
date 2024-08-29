@@ -54,9 +54,9 @@ document.getElementById('loadUrls').addEventListener('click', loadUrlsFromText);
 
 // Fonction commune pour traiter les URLs
 function processUrls(urls) {
-  // Clear existing preview
   preview.innerHTML = '';
   images = [];
+  allUrls = urls; // Store all URLs
   hasError = false;
 
   urls.forEach((url, index) => {
@@ -74,7 +74,6 @@ function processUrls(urls) {
     img.src = url;
   });
 
-  // After processing all URLs, update the Download All button visibility
   setTimeout(() => {
     updateDownloadAllButtonVisibility();
   }, 0);
@@ -93,7 +92,7 @@ function showError(message) {
 
 function updateDownloadAllButtonVisibility() {
   const downloadAllButton = document.getElementById('downloadAll');
-  downloadAllButton.style.display = (allUrls.length > 0 && !hasError) ? 'block' : 'none';
+  downloadAllButton.style.display = (images.length > 0 && !hasError) ? 'block' : 'none';
 }
 
 // Fonction pour cacher la section d'instructions
@@ -107,64 +106,42 @@ document.getElementById('hideInstructions').addEventListener('click', hideInstru
 let currentPage = 1;
 const imagesPerPage = 10;
 let allUrls = [];
+let images = [];
 
-document.getElementById('downloadAll').addEventListener('click', () => {
-  chrome.runtime.sendMessage({action: "downloadAll"});
-  console.log("Demande de téléchargement envoyée.");
-});
-
-document.getElementById('prevPage').addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage--;
-    previewImages();
-    updatePaginationControls();
-  }
-});
-
-document.getElementById('nextPage').addEventListener('click', () => {
-  if (currentPage < Math.ceil(allUrls.length / imagesPerPage)) {
-    currentPage++;
-    previewImages();
-    updatePaginationControls();
-  }
-});
+function showPreview() {
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+  currentPage = 1;
+  previewImages();
+  updatePaginationControls();
+  document.getElementById('previewSection').style.display = 'block';
+}
 
 function previewImages() {
   const preview = document.getElementById('preview');
   preview.innerHTML = '';
   const startIndex = (currentPage - 1) * imagesPerPage;
   const endIndex = startIndex + imagesPerPage;
-  const urlsToShow = allUrls.slice(startIndex, endIndex);
+  const imagesToShow = images.slice(startIndex, endIndex);
 
-  urlsToShow.forEach(url => {
-    try {
-      new URL(url); // Vérifier si l'URL est valide
-      const container = document.createElement('div');
-      container.className = 'image-container';
-      
-      const img = document.createElement('img');
-      img.src = url;
-      img.onerror = () => {
-        console.error(`Impossible de charger l'image: ${url}`);
-        img.alt = "Image non disponible";
-      };
-      
-      const urlText = document.createElement('p');
-      urlText.textContent = url;
-      urlText.className = 'image-url';
-      
-      container.appendChild(img);
-      container.appendChild(urlText);
-      preview.appendChild(container);
-    } catch (e) {
-      console.error(`URL invalide: ${url}`);
-    }
+  imagesToShow.forEach(image => {
+    const container = document.createElement('div');
+    container.className = 'image-container';
+    
+    container.appendChild(image.element);
+    
+    const urlText = document.createElement('p');
+    urlText.textContent = image.url;
+    urlText.className = 'image-url';
+    
+    container.appendChild(urlText);
+    preview.appendChild(container);
   });
 }
 
 function updatePaginationControls() {
-  const totalPages = Math.ceil(allUrls.length / imagesPerPage);
-  document.getElementById('pageInfo').textContent = `Page ${currentPage} sur ${totalPages}`;
+  const totalPages = Math.ceil(images.length / imagesPerPage);
+  document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
   document.getElementById('prevPage').style.display = currentPage > 1 ? 'block' : 'none';
   document.getElementById('nextPage').style.display = currentPage < totalPages ? 'block' : 'none';
   updateDownloadAllButtonVisibility();
