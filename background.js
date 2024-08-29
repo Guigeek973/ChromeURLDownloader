@@ -18,7 +18,7 @@ function downloadImages(urls) {
       new URL(url); // Vérifier si l'URL est valide
       chrome.downloads.download({
         url: url,
-        filename: `downloaded_images/image_${index}${getFileExtension(url)}`,
+        filename: `downloaded_content/image_${index}${getFileExtension(url)}`,
         saveAs: false
       }, (downloadId) => {
         if (chrome.runtime.lastError) {
