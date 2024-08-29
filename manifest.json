@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Web Url Content Downloader",
+  "name": "Web Url Content Downloader (for images only)",
   "version": "1.0",
-  "description": "Télécharge le contenu web à partir d'un CSV composé d'url",
+  "description": "Downloads web content from a CSV file containing URLs",
   "permissions": ["activeTab", "storage", "downloads"],
   "action": {
     "default_popup": "popup.html"

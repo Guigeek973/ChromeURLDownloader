@@ -7,7 +7,7 @@ document.getElementById('csvFile').addEventListener('change', (event) => {
       processUrls(urls);
     };
     reader.onerror = (error) => {
-      console.error('Error reading file:', error);
+      console.error('Erreur lors de la lecture du fichier:', error);
     };
     reader.readAsText(file, 'UTF-8');
   }
@@ -43,8 +43,9 @@ function loadUrlsFromText() {
   const urls = urlText.split('\n').filter(url => url.trim() !== '');
   if (urls.length > 0) {
     processUrls(urls);
+    saveTextAreaContent(); // Sauvegarder après le chargement
   } else {
-    console.error('No valid URLs found in the text area.');
+    console.error('Aucune URL valide trouvée dans la zone de texte.');
   }
 }
 
@@ -53,20 +54,46 @@ document.getElementById('loadUrls').addEventListener('click', loadUrlsFromText);
 
 // Fonction commune pour traiter les URLs
 function processUrls(urls) {
-  if (urls.length > 0) {
-    chrome.storage.local.set({urls: urls}, () => {
-      console.log('URLs successfully loaded:', urls);
-      allUrls = urls;
-      currentPage = 1;
-      previewImages();
-      updatePaginationControls();
-      hideInstructions();
-      document.getElementById('previewSection').style.display = 'block';
-    });
-  } else {
-    console.error('No valid URLs found.');
-    document.getElementById('previewSection').style.display = 'none';
-  }
+  // Clear existing preview
+  preview.innerHTML = '';
+  images = [];
+  hasError = false;
+
+  urls.forEach((url, index) => {
+    const img = new Image();
+    img.onload = function() {
+      images.push({ url: url, element: img });
+      if (images.length === urls.length) {
+        showPreview();
+      }
+    };
+    img.onerror = function() {
+      hasError = true;
+      showError(`Error: URL at line ${index + 1} is not a valid image: ${url}`);
+    };
+    img.src = url;
+  });
+
+  // After processing all URLs, update the Download All button visibility
+  setTimeout(() => {
+    updateDownloadAllButtonVisibility();
+  }, 0);
+}
+
+function showError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.textContent = message;
+  preview.appendChild(errorDiv);
+  previewSection.style.display = 'block';
+  
+  // Hide Download All button when there's an error
+  updateDownloadAllButtonVisibility();
+}
+
+function updateDownloadAllButtonVisibility() {
+  const downloadAllButton = document.getElementById('downloadAll');
+  downloadAllButton.style.display = (allUrls.length > 0 && !hasError) ? 'block' : 'none';
 }
 
 // Fonction pour cacher la section d'instructions
@@ -140,5 +167,44 @@ function updatePaginationControls() {
   document.getElementById('pageInfo').textContent = `Page ${currentPage} sur ${totalPages}`;
   document.getElementById('prevPage').style.display = currentPage > 1 ? 'block' : 'none';
   document.getElementById('nextPage').style.display = currentPage < totalPages ? 'block' : 'none';
-  document.getElementById('downloadAll').style.display = allUrls.length > 0 ? 'block' : 'none';
+  updateDownloadAllButtonVisibility();
 }
+
+// Fonction pour sauvegarder le contenu de la zone de texte
+function saveTextAreaContent() {
+  const textArea = document.getElementById('urlTextArea');
+  chrome.storage.local.set({ 'savedUrls': textArea.value }, function() {
+    console.log('URLs sauvegardées');
+  });
+}
+
+// Modifier la fonction loadTextAreaContent
+function loadTextAreaContent() {
+  chrome.storage.local.get(['savedUrls'], function(result) {
+    if (result.savedUrls) {
+      document.getElementById('urlTextArea').value = result.savedUrls;
+      toggleInputMode('text'); // Afficher l'onglet Texte si des URLs sont sauvegardées
+    }
+  });
+}
+
+// Ajouter un écouteur d'événements pour sauvegarder le contenu lors de la saisie
+document.getElementById('urlTextArea').addEventListener('input', saveTextAreaContent);
+
+// Charger le contenu sauvegardé et configurer l'interface lors de l'ouverture de la popup
+document.addEventListener('DOMContentLoaded', () => {
+  loadTextAreaContent();
+  // Les autres initialisations peuvent rester ici si nécessaire
+});
+
+// Fonction pour effacer le contenu de la zone de texte
+function clearTextArea() {
+  document.getElementById('urlTextArea').value = '';
+  saveTextAreaContent(); // Sauvegarder l'état vide
+  console.log('Zone de texte effacée');
+}
+
+// Écouteur d'événement pour le bouton d'effacement
+document.getElementById('clearUrls').addEventListener('click', clearTextArea);
+
+// ... reste du code existant ...

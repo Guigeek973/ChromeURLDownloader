@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Web Content Downloader</title>
+  <title>Web Content Downloader (for images)</title>
   <style>
     html, body {
       height: 100%;
@@ -37,14 +37,21 @@
     #csvFile {
       display: none;
     }
-    .file-input-label {
+    .file-input-label, .clear-button {
       display: inline-block;
       padding: 10px 15px;
-      background-color: #4CAF50;
       color: white;
       cursor: pointer;
       border-radius: 4px;
       margin-right: 10px;
+      border: none;
+      font-size: 14px;
+    }
+    .file-input-label {
+      background-color: #4CAF50;
+    }
+    .clear-button {
+      background-color: #f44336; /* Red color for the Clear button */
     }
     #previewSection {
       display: none;
@@ -177,55 +184,74 @@
       font-size: 12px;
       color: #666;
     }
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+    }
+    .button-group button {
+      flex: 1;
+      margin-right: 10px;
+    }
+    .button-group button:last-child {
+      margin-right: 0;
+    }
+    .error-message {
+      color: #f44336;
+      background-color: #ffebee;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #f44336;
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <h1>Web Content Downloader</h1>
+    <h1>Web Content Downloader (for images)</h1>
     <div class="card instructions" id="instructionsSection">
       <button class="hide-instructions" id="hideInstructions">×</button>
-      <p><strong>Comment utiliser cet outil :</strong></p>
+      <p><strong>How to use this tool:</strong></p>
       <ol>
-        <li>Sélectionnez un fichier CSV contenant des URLs de site web contenant des images (une par ligne).</li>
-        <li>Ou collez directement les URLs dans la zone de texte, une par ligne.</li>
-        <li>Les images seront prévisualisées automatiquement.</li>
-        <li>Utilisez les boutons de pagination pour naviguer entre les images.</li>
-        <li>Cliquez sur "Tout télécharger" pour sauvegarder toutes les images.</li>
+        <li>Select a CSV file containing URLs of websites with images (one per line).</li>
+        <li>Or directly paste the URLs into the text area, one per line.</li>
+        <li>Images will be previewed automatically.</li>
+        <li>Use the pagination buttons to navigate between images.</li>
+        <li>Click "Download All" to save all images.</li>
       </ol>
     </div>
     <div class="card input-section">
       <div class="input-toggle">
-        <button id="csvToggle" class="active">Fichier CSV</button>
-        <button id="textToggle">Texte</button>
+        <button id="csvToggle" class="active">CSV File</button>
+        <button id="textToggle">Text</button>
       </div>
       <div id="csvInput">
         <input type="file" id="csvFile" accept=".csv">
-        <label for="csvFile" class="file-input-label">Choisir un fichier CSV</label>
+        <label for="csvFile" class="file-input-label">Choose CSV File</label>
       </div>
       <div id="textInput" style="display:none;">
-        <textarea id="urlTextArea" placeholder="Collez vos URLs ici, une par ligne"></textarea>
-        <button id="loadUrls" class="file-input-label">Charger les URLs</button>
+        <textarea id="urlTextArea" placeholder="Paste your URLs here, one per line"></textarea>
+        <div class="button-group">
+          <button id="loadUrls" class="file-input-label">Load URLs</button>
+          <button id="clearUrls" class="clear-button">Clear</button>
+        </div>
       </div>
     </div>
     <div class="card" id="previewSection">
       <div id="preview"></div>
       <div class="pagination">
-        <button id="prevPage" style="display:none;">Précédent</button>
+        <button id="prevPage" style="display:none;">Previous</button>
         <span id="pageInfo"></span>
-        <button id="nextPage" style="display:none;">Suivant</button>
+        <button id="nextPage" style="display:none;">Next</button>
       </div>
-      <button id="downloadAll">Tout télécharger</button>
+      <button id="downloadAll">Download All</button>
     </div>
   </div>
   <footer>
-    <p>© 2023 Web Content Downloader. Tous droits réservés.</p>
-    <p>Développé par Guillaume OSTORERO</p>
+    <p>© 2023 Web Content Downloader (for images). All rights reserved.</p>
+    <p>Developed by Guigeek973</p>
     <div class="social-icons">
       <a href="https://github.com/Guigeek973" target="_blank" rel="noopener noreferrer">
         <img src="https://github.com/favicon.ico" alt="GitHub" width="16" height="16">
-      </a>
-      <a href="https://www.linkedin.com/in/guillaume-ostorero/" target="_blank" rel="noopener noreferrer">
-        <img src="https://www.linkedin.com/favicon.ico" alt="LinkedIn" width="16" height="16">
       </a>
     </div>
   </footer>
